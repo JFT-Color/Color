@@ -1,0 +1,94 @@
+import React, { useState, useEffect } from "react";
+
+function generateTargetColor() {
+  return {
+    h: Math.floor(Math.random() * 360),
+    s: Math.floor(Math.random() * 101),
+    l: Math.floor(Math.random() * 101)
+  };
+}
+
+function hslToString({ h, s, l }) {
+  return `hsl(${h}, ${s}%, ${l}%)`;
+}
+
+function calculateScore(target, guess) {
+  const dh = Math.abs(target.h - guess.h);
+  const ds = Math.abs(target.s - guess.s);
+  const dl = Math.abs(target.l - guess.l);
+  const maxDiff = 360 + 100 + 100;
+  const totalDiff = dh + ds + dl;
+  return Math.max(0, 100 - (totalDiff / maxDiff) * 100).toFixed(2);
+}
+
+export default function ColorMatchGame() {
+  const [targetColor, setTargetColor] = useState(generateTargetColor());
+  const [round, setRound] = useState(1);
+  const [attempts, setAttempts] = useState(0);
+  const [submittedColor, setSubmittedColor] = useState(null);
+  const [scores, setScores] = useState([]);
+
+  const [h, setH] = useState(0);
+  const [s, setS] = useState(50);
+  const [l, setL] = useState(50);
+
+  const guessColor = { h, s, l };
+  const currentScore = submittedColor ? calculateScore(targetColor, submittedColor) : null;
+
+  function handleSubmit() {
+    if (attempts < 3) {
+      setSubmittedColor(guessColor);
+      setAttempts(attempts + 1);
+    }
+  }
+
+  function handleNextRound() {
+    setScores([...scores, currentScore]);
+    setTargetColor(generateTargetColor());
+    setSubmittedColor(null);
+    setAttempts(0);
+    setRound(round + 1);
+    setH(0);
+    setS(50);
+    setL(50);
+  }
+
+  return (
+    <div className="p-6 max-w-xl mx-auto">
+      <h1 className="text-2xl font-bold mb-4">🎯 Color Match Challenge</h1>
+
+      <div className="mb-4">
+        <p className="mb-1 font-medium">Target Color:</p>
+        <div
+          className="w-full h-16 rounded"
+          style={{ backgroundColor: hslToString(targetColor) }}
+        ></div>
+      </div>
+
+      <div className="mb-4">
+        <p className="mb-1 font-medium">Your Submitted Color:</p>
+        <div className="w-full h-16 rounded mb-2" style={{ backgroundColor: submittedColor ? hslToString(submittedColor) : '#ccc' }}></div>
+
+        <label>Hue: {h}°</label>
+        <input type="range" min="0" max="360" value={h} onChange={e => setH(Number(e.target.value))} className="w-full" />
+        <label>Saturation: {s}%</label>
+        <input type="range" min="0" max="100" value={s} onChange={e => setS(Number(e.target.value))} className="w-full" />
+        <label>Lightness: {l}%</label>
+        <input type="range" min="0" max="100" value={l} onChange={e => setL(Number(e.target.value))} className="w-full" />
+      </div>
+
+      {attempts < 3 ? (
+        <button onClick={handleSubmit} className="bg-blue-600 text-white px-4 py-2 rounded">Submit</button>
+      ) : (
+        <button onClick={handleNextRound} className="bg-green-600 text-white px-4 py-2 rounded">Next Color</button>
+      )}
+
+      {submittedColor && (
+        <div className="mt-4">
+          <p>Your Score: <span className="font-bold">{currentScore}%</span></p>
+          <p>Attempt {attempts} of 3</p>
+        </div>
+      )}
+    </div>
+  );
+}
