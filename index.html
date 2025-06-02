@@ -1,0 +1,74 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Color Match Game</title>
+  <style>
+    body { font-family: Arial; padding: 2rem; }
+    .swatch { width: 100px; height: 100px; border: 1px solid #000; margin-bottom: 1rem; }
+    .slider { margin-bottom: 1rem; width: 100%; }
+  </style>
+</head>
+<body>
+  <h1>Color Match Game</h1>
+
+  <h3>Target Color</h3>
+  <div id="target" class="swatch"></div>
+
+  <h3>Your Color</h3>
+  <div id="user" class="swatch"></div>
+
+  <label>Hue: <span id="hVal">0</span></label>
+  <input type="range" min="0" max="360" value="0" id="hSlider" class="slider" />
+  <br />
+  <label>Saturation: <span id="sVal">50</span>%</label>
+  <input type="range" min="0" max="100" value="50" id="sSlider" class="slider" />
+  <br />
+  <label>Lightness: <span id="lVal">50</span>%</label>
+  <input type="range" min="0" max="100" value="50" id="lSlider" class="slider" />
+  <br /><br />
+  <button onclick="submitColor()">Submit</button>
+  <p id="result"></p>
+
+  <script>
+    const target = {
+      h: Math.floor(Math.random() * 361),
+      s: Math.floor(Math.random() * 101),
+      l: Math.floor(Math.random() * 101)
+    };
+    document.getElementById('target').style.backgroundColor = `hsl(${target.h},${target.s}%,${target.l}%)`;
+
+    const hSlider = document.getElementById('hSlider');
+    const sSlider = document.getElementById('sSlider');
+    const lSlider = document.getElementById('lSlider');
+
+    function updateUserColor() {
+      const h = parseInt(hSlider.value);
+      const s = parseInt(sSlider.value);
+      const l = parseInt(lSlider.value);
+      document.getElementById('hVal').textContent = h;
+      document.getElementById('sVal').textContent = s;
+      document.getElementById('lVal').textContent = l;
+      document.getElementById('user').style.backgroundColor = `hsl(${h},${s}%,${l}%)`;
+    }
+
+    hSlider.oninput = updateUserColor;
+    sSlider.oninput = updateUserColor;
+    lSlider.oninput = updateUserColor;
+
+    function submitColor() {
+      const h = parseInt(hSlider.value);
+      const s = parseInt(sSlider.value);
+      const l = parseInt(lSlider.value);
+      const dh = Math.abs(target.h - h);
+      const ds = Math.abs(target.s - s);
+      const dl = Math.abs(target.l - l);
+      const score = Math.max(0, 100 - ((dh + ds + dl) / 560) * 100).toFixed(2);
+      document.getElementById('result').textContent = `Score: ${score}%`;
+    }
+
+    updateUserColor();
+  </script>
+</body>
+</html>
